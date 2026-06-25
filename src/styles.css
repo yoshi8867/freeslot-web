@@ -302,6 +302,8 @@ ul.suggestions {
   justify-content: center;
   z-index: 50;
   padding: 18px;
+  /* iOS Safari는 cursor:pointer가 없는 일반 div의 탭 click을 발화하지 않음 → dim 탭 닫기용 */
+  cursor: pointer;
 }
 .modal {
   background: #fff;
@@ -312,6 +314,7 @@ ul.suggestions {
   overflow-y: auto;
   padding: 16px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
+  cursor: default;
 }
 .modal-head {
   display: flex;
