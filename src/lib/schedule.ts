@@ -37,7 +37,7 @@ export function build(data: TimetableData): TeacherSchedule {
   const sep = data.separator
   const result: TeacherSchedule = new Map()
 
-  const weekHasChange = hasWeeklyData(data.change)
+  const weekHasChange = hasWeeklyData(data)
 
   for (let g = 1; g <= 3; g++) {
     const classCount = data.classCounts[g] ?? 0
@@ -74,17 +74,19 @@ export function build(data: TimetableData): TeacherSchedule {
   return result
 }
 
-/** 자료147에 실제 교시(1..7) 데이터가 한 칸이라도 있으면 true(주간 운영 주차). */
-function hasWeeklyData(change: TimetableData['change']): boolean {
-  for (const classesOfGrade of change ?? []) {
-    if (!classesOfGrade) continue
-    for (const daysOfClass of classesOfGrade) {
-      if (!daysOfClass) continue
+/**
+ * 자료147에 실제 교시(1..7) 데이터가 한 칸이라도 있으면 true(주간 운영 주차).
+ *
+ * comci 4D 배열은 각 레벨 index 0이 스칼라(개수 등)라 for-of로 순회하면 비배열을 만나 터진다.
+ * build()와 동일하게 1-based 인덱스 + 옵셔널 체이닝(get4)으로만 접근한다.
+ */
+function hasWeeklyData(data: TimetableData): boolean {
+  for (let g = 1; g <= 3; g++) {
+    const classCount = data.classCounts[g] ?? 0
+    for (let c = 1; c <= classCount; c++) {
       for (const d of DAY_RANGE) {
-        const periods = daysOfClass[d]
-        if (!periods) continue
         for (const p of PERIOD_RANGE) {
-          if (periods[p] != null) return true
+          if (get4(data.change, g, c, d, p) != null) return true
         }
       }
     }
