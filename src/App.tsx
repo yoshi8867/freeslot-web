@@ -10,8 +10,10 @@ import {
   DEFAULT_FONT_LEVEL,
   loadInitialState,
   saveState,
+  syncUrlToSchool,
   type AppState,
 } from './state'
+import { GearIcon, LinkIcon, Spinner } from './components/Icons'
 import { GroupBar } from './components/GroupBar'
 import { TeacherSearch } from './components/TeacherSearch'
 import { TimetableGrid } from './components/TimetableGrid'
@@ -110,6 +112,7 @@ export default function App() {
 
   const setSchoolCode = (code: string) => {
     setState((s) => ({ ...s, schoolCode: code }))
+    syncUrlToSchool(code)
     load('', code)
   }
   const changeFont = (delta: number) =>
@@ -136,10 +139,10 @@ export default function App() {
         <h1>공강 찾기</h1>
         <span className="spacer" />
         <button className="icon-btn" onClick={share} title="공유">
-          🔗
+          <LinkIcon />
         </button>
         <button className="icon-btn" onClick={() => setModal({ type: 'settings' })} title="설정">
-          ⚙
+          <GearIcon />
         </button>
       </div>
 
@@ -166,7 +169,11 @@ export default function App() {
         />
       )}
 
-      {status === 'loading' && <div className="status">불러오는 중…</div>}
+      {status === 'loading' && (
+        <div className="status">
+          <Spinner />
+        </div>
+      )}
       {status === 'error' && <div className="status">{errMsg}</div>}
       {status === 'ok' && data && (
         <TimetableGrid

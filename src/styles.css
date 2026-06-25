@@ -57,12 +57,14 @@ button {
   flex: 1;
 }
 .icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border: none;
   background: transparent;
-  font-size: calc(18px * var(--scale));
-  padding: 4px 6px;
+  padding: 6px;
   color: #555;
-  border-radius: 6px;
+  border-radius: 8px;
 }
 .icon-btn:active {
   background: #eee;
@@ -453,4 +455,19 @@ ul.suggestions {
   text-align: center;
   color: #888;
   font-size: 14px;
+  display: flex;
+  justify-content: center;
+}
+.spinner {
+  width: 30px;
+  height: 30px;
+  border: 3px solid #e3e3e3;
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }

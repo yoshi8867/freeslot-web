@@ -39,22 +39,33 @@ export function clampFont(level: number): number {
   return Math.max(MIN_FONT_LEVEL, Math.min(MAX_FONT_LEVEL, Math.round(level)))
 }
 
-/** 초기 상태 로드: URL ?s= 우선 → localStorage → 기본값. URL 적용 후 ?s=는 주소창에서 제거. */
+/**
+ * 초기 상태 로드.
+ * 우선순위: 경로의 학교코드(/{코드}) > ?s= 공유데이터 > localStorage > 기본값.
+ * 로드 후 주소를 /{학교코드} 로 정규화하고 ?s=는 제거한다.
+ */
 export function loadInitialState(): AppState {
+  let base: AppState
   const fromUrl = readShareParam()
-  if (fromUrl) {
-    const merged = sanitize(fromUrl)
-    saveState(merged)
-    stripShareParamFromUrl()
-    return merged
-  }
+  if (fromUrl) base = sanitize(fromUrl)
+  else base = readStored() ?? { ...DEFAULT_STATE }
+
+  const pathCode = parsePathSchoolCode()
+  if (pathCode) base = sanitize({ ...base, schoolCode: pathCode })
+
+  saveState(base)
+  syncUrlToSchool(base.schoolCode)
+  return base
+}
+
+function readStored(): AppState | null {
   try {
     const raw = localStorage.getItem(LS_KEY)
     if (raw) return sanitize({ ...DEFAULT_STATE, ...JSON.parse(raw) })
   } catch {
     /* ignore corrupt storage */
   }
-  return { ...DEFAULT_STATE }
+  return null
 }
 
 export function saveState(state: AppState): void {
@@ -65,10 +76,20 @@ export function saveState(state: AppState): void {
   }
 }
 
-/** 현재 상태를 담은 공유 URL 생성. */
+/** 현재 상태를 담은 공유 URL 생성: /{학교코드}?s={데이터}. */
 export function buildShareUrl(state: AppState): string {
-  const param = encodeShare(state)
-  return `${location.origin}${location.pathname}?s=${param}`
+  return `${location.origin}/${state.schoolCode}?s=${encodeShare(state)}`
+}
+
+/** 주소창 경로를 학교코드와 그 외 공유데이터로 정규화. */
+export function syncUrlToSchool(schoolCode: string): void {
+  history.replaceState(null, '', `/${schoolCode}`)
+}
+
+/** 경로 첫 세그먼트가 숫자면 학교코드로 사용(/16213 → "16213"). 아니면 null. */
+function parsePathSchoolCode(): string | null {
+  const seg = location.pathname.split('/').filter(Boolean)[0]
+  return seg && /^[0-9]+$/.test(seg) ? seg : null
 }
 
 // ── 내부 ──────────────────────────────────────────────────────────────────────
@@ -102,12 +123,6 @@ function readShareParam(): AppState | null {
 
 function encodeShare(state: AppState): string {
   return b64urlEncode(JSON.stringify(state))
-}
-
-function stripShareParamFromUrl(): void {
-  const url = new URL(location.href)
-  url.searchParams.delete('s')
-  history.replaceState(null, '', url.pathname + url.search)
 }
 
 function b64urlEncode(s: string): string {
