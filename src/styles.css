@@ -103,7 +103,8 @@ button {
   font-size: calc(14px * var(--scale));
   border-bottom: 1px solid #f0f0f0;
 }
-.suggestions li:active {
+.suggestions li:active,
+.suggestions li.active {
   background: #eef3fa;
 }
 ul.suggestions {
