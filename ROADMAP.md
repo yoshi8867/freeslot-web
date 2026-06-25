@@ -7,8 +7,8 @@
 - [x] 폴더·구조(server/ + src/), Vite(React+TS)+Express, package.json/tsconfig/vite.config
 - [x] `/healthz` 엔드포인트
 - [x] README, render.yaml, .gitignore
-- [ ] 독립 git repo init + 최초 커밋 (사용자 승인 후)
-- [ ] GitHub repo 생성 + push (사용자 승인 후)
+- [x] 독립 git repo init + 최초 커밋
+- [x] GitHub repo 생성 + push (public: github.com/yoshi8867/freeslot-web)
 
 ## 2. 백엔드 프록시
 - [x] `GET /api/timetable?school=&r=` — comci.net 호출(UTF-8 디코딩, trailing garbage strip), JSON 반환
