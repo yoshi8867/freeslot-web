@@ -17,3 +17,16 @@ export async function fetchTimetable(school: string, r = ''): Promise<TimetableD
   }
   return parseTimetable(await res.json())
 }
+
+export interface School {
+  name: string
+  code: string
+  region: string
+}
+
+/** 학교 이름으로 검색 → 매칭 학교 목록(코드 포함). */
+export async function searchSchools(q: string): Promise<School[]> {
+  const res = await fetch(`/api/schools?q=${encodeURIComponent(q)}`)
+  if (!res.ok) throw new Error(`학교 검색에 실패했습니다 (${res.status})`)
+  return res.json()
+}

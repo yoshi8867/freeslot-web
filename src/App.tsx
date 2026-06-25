@@ -10,6 +10,7 @@ import {
   DEFAULT_FONT_LEVEL,
   loadInitialState,
   saveState,
+  shouldPromptSchool,
   syncUrlToSchool,
   type AppState,
 } from './state'
@@ -18,7 +19,13 @@ import { GroupBar } from './components/GroupBar'
 import { TeacherSearch } from './components/TeacherSearch'
 import { TimetableGrid } from './components/TimetableGrid'
 import { WeekBar } from './components/WeekBar'
-import { CellDetailModal, GroupEditModal, LunchModal, SettingsModal } from './components/Modals'
+import {
+  CellDetailModal,
+  GroupEditModal,
+  LunchModal,
+  SchoolSearchModal,
+  SettingsModal,
+} from './components/Modals'
 
 type Modal =
   | null
@@ -26,8 +33,11 @@ type Modal =
   | { type: 'groupEdit' }
   | { type: 'lunch'; day: number }
   | { type: 'cell'; day: number; period: number }
+  | { type: 'schoolSearch' }
 
 export default function App() {
+  // ⚠️ loadInitialState가 localStorage에 쓰기 전에 "빈 상태" 여부를 먼저 캡처
+  const [promptSchool] = useState(shouldPromptSchool)
   const [state, setState] = useState<AppState>(loadInitialState)
   useEffect(() => saveState(state), [state])
 
@@ -36,7 +46,7 @@ export default function App() {
   const [selectedR, setSelectedR] = useState('')
   const [status, setStatus] = useState<'loading' | 'ok' | 'error'>('loading')
   const [errMsg, setErrMsg] = useState('')
-  const [modal, setModal] = useState<Modal>(null)
+  const [modal, setModal] = useState<Modal>(promptSchool ? { type: 'schoolSearch' } : null)
   const [toast, setToast] = useState('')
 
   const load = useCallback(async (r: string, code: string) => {
@@ -207,6 +217,15 @@ export default function App() {
           onSetSchoolCode={setSchoolCode}
           onChangeFont={changeFont}
           onSetLunch={(v) => setState((s) => ({ ...s, lunchEnabled: v }))}
+          onClose={() => setModal(null)}
+        />
+      )}
+      {modal?.type === 'schoolSearch' && (
+        <SchoolSearchModal
+          onPick={(code) => {
+            setSchoolCode(code)
+            setModal(null)
+          }}
           onClose={() => setModal(null)}
         />
       )}

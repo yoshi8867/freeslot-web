@@ -92,6 +92,19 @@ function parsePathSchoolCode(): string | null {
   return seg && /^[0-9]+$/.test(seg) ? seg : null
 }
 
+/**
+ * 학교 검색 모달을 띄울지 여부 — 경로에 학교코드도 없고 저장된 상태도 없는 "첫 방문/빈 상태".
+ * ⚠️ loadInitialState가 localStorage에 기본값을 쓰기 전에 호출해야 한다.
+ */
+export function shouldPromptSchool(): boolean {
+  if (parsePathSchoolCode()) return false
+  try {
+    return !localStorage.getItem(LS_KEY)
+  } catch {
+    return true
+  }
+}
+
 // ── 내부 ──────────────────────────────────────────────────────────────────────
 
 function sanitize(s: AppState): AppState {

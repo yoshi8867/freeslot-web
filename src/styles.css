@@ -393,6 +393,24 @@ ul.suggestions {
   border: 1px solid #ccc;
   border-radius: 8px;
 }
+.code-row {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+}
+.code-row .text-input {
+  flex: 1;
+  width: auto;
+}
+.filter-chip.nowrap {
+  white-space: nowrap;
+}
+.school-row {
+  cursor: pointer;
+}
+.school-row:active {
+  background: #eef3fa;
+}
 .edit-row {
   display: flex;
   align-items: center;

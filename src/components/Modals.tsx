@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { searchSchools, type School } from '../api'
 import {
   classCode,
   lunchGroups,
@@ -9,6 +10,7 @@ import { busyTeachers } from '../lib/schedule'
 import { DAY_NAMES, type TeacherSchedule } from '../lib/types'
 import { contentColorFor } from '../lib/palette'
 import { MAX_FONT_LEVEL, MIN_FONT_LEVEL, type Group } from '../state'
+import { Spinner } from './Icons'
 
 function Modal({ title, onClose, children }: { title: string; onClose: () => void; children: React.ReactNode }) {
   return (
@@ -58,11 +60,13 @@ interface SettingsProps {
 
 export function SettingsModal(p: SettingsProps) {
   const [code, setCode] = useState(p.schoolCode)
+  const [showSearch, setShowSearch] = useState(false)
   const close = () => {
     if (code.trim() && code.trim() !== p.schoolCode) p.onSetSchoolCode(code.trim())
     p.onClose()
   }
   return (
+    <>
     <Modal title="설정" onClose={close}>
       <div className="section">
         <div className="section-title">표시 형식</div>
@@ -84,13 +88,18 @@ export function SettingsModal(p: SettingsProps) {
 
       <div className="section">
         <div className="section-title">학교 코드</div>
-        <input
-          className="text-input"
-          inputMode="numeric"
-          placeholder="16213"
-          value={code}
-          onChange={(e) => setCode(e.target.value.replace(/[^0-9]/g, ''))}
-        />
+        <div className="code-row">
+          <input
+            className="text-input"
+            inputMode="numeric"
+            placeholder="16213"
+            value={code}
+            onChange={(e) => setCode(e.target.value.replace(/[^0-9]/g, ''))}
+          />
+          <button className="filter-chip nowrap" onClick={() => setShowSearch(true)}>
+            학교 이름으로 검색
+          </button>
+        </div>
       </div>
 
       <div className="section">
@@ -117,6 +126,89 @@ export function SettingsModal(p: SettingsProps) {
       <button className="btn-primary" onClick={close}>
         완료
       </button>
+    </Modal>
+    {showSearch && (
+      <SchoolSearchModal
+        onPick={(picked) => {
+          setCode(picked)
+          setShowSearch(false)
+        }}
+        onClose={() => setShowSearch(false)}
+      />
+    )}
+    </>
+  )
+}
+
+// ── 학교 검색 ──────────────────────────────────────────────────────────────────
+
+interface SchoolSearchProps {
+  onPick: (code: string, name: string) => void
+  onClose: () => void
+}
+
+export function SchoolSearchModal({ onPick, onClose }: SchoolSearchProps) {
+  const [q, setQ] = useState('')
+  const [results, setResults] = useState<School[] | null>(null)
+  const [loading, setLoading] = useState(false)
+  const [err, setErr] = useState('')
+
+  const run = async () => {
+    const term = q.trim()
+    if (!term) return
+    setLoading(true)
+    setErr('')
+    try {
+      setResults(await searchSchools(term))
+    } catch {
+      setErr('검색에 실패했습니다. 잠시 후 다시 시도해 주세요.')
+      setResults(null)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <Modal title="학교 검색" onClose={onClose}>
+      <div className="code-row">
+        <input
+          className="text-input"
+          placeholder="학교 이름 (예: 용산고)"
+          value={q}
+          autoFocus
+          onChange={(e) => setQ(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') run()
+          }}
+        />
+        <button className="filter-chip nowrap" onClick={run}>
+          검색
+        </button>
+      </div>
+
+      {loading && (
+        <div className="status">
+          <Spinner />
+        </div>
+      )}
+      {err && <div className="empty-note" style={{ marginTop: 12 }}>{err}</div>}
+      {!loading && results && results.length === 0 && (
+        <div className="empty-note" style={{ marginTop: 12 }}>검색 결과가 없습니다.</div>
+      )}
+      {results && results.length > 0 && (
+        <div style={{ marginTop: 8 }}>
+          {results.map((s) => (
+            <div
+              className="edit-row school-row"
+              key={`${s.code}-${s.name}`}
+              onClick={() => onPick(s.code, s.name)}
+            >
+              <span className="name">{s.name}</span>
+              {s.region && <span className="empty-note">{s.region}</span>}
+            </div>
+          ))}
+        </div>
+      )}
     </Modal>
   )
 }
