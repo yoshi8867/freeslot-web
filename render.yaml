@@ -1,0 +1,17 @@
+# Render 단일 웹서비스 — Express가 /api + /healthz + 정적(dist) 모두 서빙.
+services:
+  - type: web
+    name: freeslot-web
+    runtime: node
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    healthCheckPath: /healthz
+    envVars:
+      - key: NODE_VERSION
+        value: '20'
+    # 매직넘버는 기본값(서버 코드)으로 동작. 회전 시 아래를 설정/덮어쓰기:
+    # - key: COMCI_ROUTE
+    #   value: '36179'
+    # - key: COMCI_PREFIX
+    #   value: '73629'
