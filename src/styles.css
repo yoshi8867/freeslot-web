@@ -102,6 +102,7 @@ button {
   padding: 10px 12px;
   font-size: calc(14px * var(--scale));
   border-bottom: 1px solid #f0f0f0;
+  cursor: pointer;
 }
 .suggestions li:active,
 .suggestions li.active {
@@ -132,6 +133,7 @@ ul.suggestions {
 .chip .x {
   font-size: calc(13px * var(--scale));
   opacity: 0.85;
+  cursor: pointer;
 }
 .pill-btn {
   border: none;
@@ -280,6 +282,9 @@ ul.suggestions {
   line-height: 1.18;
   font-weight: 600;
   word-break: break-all;
+}
+.cell.clickable {
+  cursor: pointer;
 }
 .cell.clickable:active {
   filter: brightness(0.96);

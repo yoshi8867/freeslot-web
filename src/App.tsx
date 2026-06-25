@@ -133,7 +133,7 @@ export default function App() {
   return (
     <div style={{ '--scale': scale } as React.CSSProperties}>
       <div className="topbar">
-        <h1>공강찾기</h1>
+        <h1>공강 찾기</h1>
         <span className="spacer" />
         <button className="icon-btn" onClick={share} title="공유">
           🔗
