@@ -108,8 +108,13 @@ function DataCell(props: Props & { day: number; period: number }) {
   }
 
   const allOff = !showName && !showClass && !showSubject
+  // 본인이 강의하는 셀이면 셀 전체를 강조(앰버 배경 + 금색 ring)
+  const mine = myTeacherIdx != null && busy.includes(myTeacherIdx)
   return (
-    <div className="cell clickable" onClick={() => onCellClick(day, period)}>
+    <div
+      className={mine ? 'cell clickable mine' : 'cell clickable'}
+      onClick={() => onCellClick(day, period)}
+    >
       {busy.map((idx) => {
         const bg = colorOf(idx)
         if (allOff) {

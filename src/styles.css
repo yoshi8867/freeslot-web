@@ -292,11 +292,14 @@ ul.suggestions {
   font-weight: 600;
   word-break: break-all;
 }
-/* 본인 교사 뱃지 강조 — 굵게·크게 */
+/* 본인 교사 뱃지 — 셀 강조가 주이므로 굵게만 */
 .badge.me {
   font-weight: 800;
-  font-size: calc(11px * var(--scale));
-  box-shadow: 0 0 0 1.5px rgba(0, 0, 0, 0.28);
+}
+/* 본인이 강의하는 셀 — 앰버 배경 + 짙은 금색 안쪽 테두리로 한눈에 구별 */
+.cell.mine {
+  background: #ffdf85;
+  box-shadow: inset 0 0 0 2px #d28a00;
 }
 .cell.clickable {
   cursor: pointer;
