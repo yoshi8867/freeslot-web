@@ -114,6 +114,13 @@ ul.suggestions {
   margin: 0;
   padding: 0;
 }
+/* 모달 안에서 쓰는 비절대(인라인) 변형 — 잘림 방지 */
+.suggestions.inline {
+  position: static;
+  box-shadow: none;
+  margin-top: 6px;
+  max-height: 40vh;
+}
 
 .chips {
   display: flex;

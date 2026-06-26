@@ -15,8 +15,8 @@ export interface AppState {
   showSubject: boolean
   fontLevel: number
   lunchEnabled: boolean
-  /** 본인 교사 이름(선택) — 뱃지에서 굵게·크게 강조 + 집계용 닉네임. */
-  myName: string
+  /** 본인 교사 인덱스(id, 선택) — 뱃지에서 굵게·크게 강조. 닉네임 문자열은 이 id로부터 유도. */
+  myTeacherIdx: number | null
 }
 
 export const DEFAULT_SCHOOL_CODE = '16213'
@@ -33,7 +33,7 @@ export const DEFAULT_STATE: AppState = {
   showSubject: true,
   fontLevel: DEFAULT_FONT_LEVEL,
   lunchEnabled: false,
-  myName: '',
+  myTeacherIdx: null,
 }
 
 const LS_KEY = 'freeslot-web'
@@ -139,7 +139,7 @@ function sanitize(s: AppState): AppState {
     showSubject: s.showSubject !== false,
     fontLevel: clampFont(s.fontLevel ?? DEFAULT_FONT_LEVEL),
     lunchEnabled: s.lunchEnabled === true,
-    myName: typeof s.myName === 'string' ? s.myName.slice(0, 40) : '',
+    myTeacherIdx: Number.isInteger(s.myTeacherIdx) ? s.myTeacherIdx : null,
   }
 }
 
