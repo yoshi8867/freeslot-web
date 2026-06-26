@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
-import { fetchTimetable } from './api'
-import { computeWeekDates, formatPeriodLabel } from './lib/helpers'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { fetchTimetable, track } from './api'
+import { computeWeekDates, formatPeriodLabel, normalizeTeacherName } from './lib/helpers'
 import { paletteColor } from './lib/palette'
 import { build } from './lib/schedule'
 import type { TeacherSchedule, TimetableData } from './lib/types'
@@ -8,6 +8,7 @@ import {
   buildShareUrl,
   clampFont,
   DEFAULT_FONT_LEVEL,
+  getVisitorId,
   loadInitialState,
   saveState,
   shouldPromptSchool,
@@ -63,11 +64,30 @@ export default function App() {
     }
   }, [])
 
+  const myNameNorm = useMemo(() => normalizeTeacherName(state.myName), [state.myName])
+
   // 최초 로드 (마운트 시 1회)
   useEffect(() => {
     load('', state.schoolCode)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  // 집계: 마운트 시 1회 접속 기록(+1)
+  useEffect(() => {
+    track({ visitorId: getVisitorId(), nickname: myNameNorm || null, schoolCode: state.schoolCode, count: true })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  // 닉네임이 바뀌면 필드만 갱신(접속횟수 미증가). 최초 실행은 마운트 트랙과 중복이라 skip.
+  const firstNameSync = useRef(true)
+  useEffect(() => {
+    if (firstNameSync.current) {
+      firstNameSync.current = false
+      return
+    }
+    track({ visitorId: getVisitorId(), nickname: myNameNorm || null, schoolCode: state.schoolCode, count: false })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [myNameNorm])
 
   useEffect(() => {
     if (!toast) return
@@ -198,6 +218,7 @@ export default function App() {
           showClass={state.showClass}
           showSubject={state.showSubject}
           showLunchRow={state.lunchEnabled}
+          myName={myNameNorm}
           onLunchClick={(day) => setModal({ type: 'lunch', day })}
           onCellClick={(day, period) => setModal({ type: 'cell', day, period })}
         />
@@ -217,6 +238,8 @@ export default function App() {
           onSetSchoolCode={setSchoolCode}
           onChangeFont={changeFont}
           onSetLunch={(v) => setState((s) => ({ ...s, lunchEnabled: v }))}
+          myName={state.myName}
+          onSetMyName={(name) => setState((s) => ({ ...s, myName: name }))}
           onClose={() => setModal(null)}
         />
       )}
@@ -244,6 +267,7 @@ export default function App() {
           selected={state.selected}
           teachers={data.teachers}
           colorOf={colorOf}
+          myName={myNameNorm}
           onClose={() => setModal(null)}
         />
       )}
@@ -256,6 +280,7 @@ export default function App() {
           teachers={data.teachers}
           subjects={data.subjects}
           colorOf={colorOf}
+          myName={myNameNorm}
           onClose={() => setModal(null)}
         />
       )}

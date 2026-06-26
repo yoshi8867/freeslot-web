@@ -1,4 +1,4 @@
-import { cellLabel } from '../lib/helpers'
+import { cellLabel, teacherDisplayName } from '../lib/helpers'
 import { busyTeachers } from '../lib/schedule'
 import { DAY_NAMES, DAY_RANGE, PERIOD_RANGE, type TeacherSchedule } from '../lib/types'
 import { contentColorFor } from '../lib/palette'
@@ -15,6 +15,8 @@ interface Props {
   showClass: boolean
   showSubject: boolean
   showLunchRow: boolean
+  /** 본인 교사 표시명(정규화된 '홍길*' 형태). 일치 뱃지는 강조. */
+  myName: string
   onLunchClick: (day: number) => void
   onCellClick: (day: number, period: number) => void
 }
@@ -86,6 +88,7 @@ function DataCell(props: Props & { day: number; period: number }) {
     showName,
     showClass,
     showSubject,
+    myName,
     onCellClick,
   } = props
 
@@ -120,8 +123,13 @@ function DataCell(props: Props & { day: number; period: number }) {
         }
         const info = schedule.get(idx)!.get(day)!.get(period)!
         const label = cellLabel(info, teachers, subjects, showName, showClass, showSubject)
+        const isMe = myName !== '' && teacherDisplayName(teachers, idx) === myName
         return (
-          <span key={idx} className="badge" style={{ background: bg, color: contentColorFor(bg) }}>
+          <span
+            key={idx}
+            className={isMe ? 'badge me' : 'badge'}
+            style={{ background: bg, color: contentColorFor(bg) }}
+          >
             {label}
           </span>
         )

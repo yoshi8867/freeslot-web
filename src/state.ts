@@ -15,6 +15,8 @@ export interface AppState {
   showSubject: boolean
   fontLevel: number
   lunchEnabled: boolean
+  /** 본인 교사 이름(선택) — 뱃지에서 굵게·크게 강조 + 집계용 닉네임. */
+  myName: string
 }
 
 export const DEFAULT_SCHOOL_CODE = '16213'
@@ -31,9 +33,25 @@ export const DEFAULT_STATE: AppState = {
   showSubject: true,
   fontLevel: DEFAULT_FONT_LEVEL,
   lunchEnabled: false,
+  myName: '',
 }
 
 const LS_KEY = 'freeslot-web'
+const VID_KEY = 'freeslot-vid'
+
+/** 브라우저별 방문 식별자(localStorage UUID). 집계용. 자격증명 아님. */
+export function getVisitorId(): string {
+  try {
+    let id = localStorage.getItem(VID_KEY)
+    if (!id) {
+      id = crypto?.randomUUID?.() ?? `v-${Date.now()}-${Math.random().toString(36).slice(2)}`
+      localStorage.setItem(VID_KEY, id)
+    }
+    return id
+  } catch {
+    return 'anon'
+  }
+}
 
 export function clampFont(level: number): number {
   return Math.max(MIN_FONT_LEVEL, Math.min(MAX_FONT_LEVEL, Math.round(level)))
@@ -121,6 +139,7 @@ function sanitize(s: AppState): AppState {
     showSubject: s.showSubject !== false,
     fontLevel: clampFont(s.fontLevel ?? DEFAULT_FONT_LEVEL),
     lunchEnabled: s.lunchEnabled === true,
+    myName: typeof s.myName === 'string' ? s.myName.slice(0, 40) : '',
   }
 }
 

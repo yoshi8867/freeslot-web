@@ -29,11 +29,17 @@ function Modal({ title, onClose, children }: { title: string; onClose: () => voi
   )
 }
 
-function NameBadge({ name, bg }: { name: string; bg: string }) {
+function NameBadge({ name, bg, me = false }: { name: string; bg: string; me?: boolean }) {
   return (
     <span
       className="badge"
-      style={{ background: bg, color: contentColorFor(bg), padding: '3px 7px', fontSize: 13 }}
+      style={{
+        background: bg,
+        color: contentColorFor(bg),
+        padding: '3px 7px',
+        fontSize: me ? 15 : 13,
+        fontWeight: me ? 800 : 600,
+      }}
     >
       {name}
     </span>
@@ -55,14 +61,18 @@ interface SettingsProps {
   onSetSchoolCode: (code: string) => void
   onChangeFont: (delta: number) => void
   onSetLunch: (v: boolean) => void
+  myName: string
+  onSetMyName: (name: string) => void
   onClose: () => void
 }
 
 export function SettingsModal(p: SettingsProps) {
   const [code, setCode] = useState(p.schoolCode)
+  const [name, setName] = useState(p.myName)
   const [showSearch, setShowSearch] = useState(false)
   const close = () => {
     if (code.trim() && code.trim() !== p.schoolCode) p.onSetSchoolCode(code.trim())
+    if (name !== p.myName) p.onSetMyName(name)
     p.onClose()
   }
   return (
@@ -121,6 +131,17 @@ export function SettingsModal(p: SettingsProps) {
           점심시간 행 표시
           <input type="checkbox" checked={p.lunchEnabled} onChange={(e) => p.onSetLunch(e.target.checked)} />
         </label>
+      </div>
+
+      <div className="section">
+        <div className="section-title">사용자 설정 (선택)</div>
+        <input
+          className="text-input"
+          placeholder="내 교사 이름 (예: 홍길)"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
+        <div className="hint">정한 이름은 시간표에서 굵게·크게 표시되어 본인 수업을 구별할 수 있어요.</div>
       </div>
 
       <button className="btn-primary" onClick={close}>
@@ -257,10 +278,11 @@ interface LunchProps {
   selected: number[]
   teachers: Array<unknown>
   colorOf: (idx: number) => string
+  myName: string
   onClose: () => void
 }
 
-export function LunchModal({ day, schedule, selected, teachers, colorOf, onClose }: LunchProps) {
+export function LunchModal({ day, schedule, selected, teachers, colorOf, myName, onClose }: LunchProps) {
   const { period4, lunch } = lunchGroups(schedule, selected, day)
   const section = (label: string, indices: number[]) => (
     <div className="section">
@@ -269,9 +291,10 @@ export function LunchModal({ day, schedule, selected, teachers, colorOf, onClose
         <span className="empty-note">없음</span>
       ) : (
         <div className="lunch-list">
-          {indices.map((idx) => (
-            <NameBadge key={idx} name={teacherDisplayName(teachers, idx)} bg={colorOf(idx)} />
-          ))}
+          {indices.map((idx) => {
+            const name = teacherDisplayName(teachers, idx)
+            return <NameBadge key={idx} name={name} bg={colorOf(idx)} me={myName !== '' && name === myName} />
+          })}
         </div>
       )}
     </div>
@@ -294,6 +317,7 @@ interface CellDetailProps {
   teachers: Array<unknown>
   subjects: Array<unknown>
   colorOf: (idx: number) => string
+  myName: string
   onClose: () => void
 }
 
@@ -305,6 +329,7 @@ export function CellDetailModal({
   teachers,
   subjects,
   colorOf,
+  myName,
   onClose,
 }: CellDetailProps) {
   const busy = busyTeachers(schedule, selected, day, period)
@@ -316,8 +341,9 @@ export function CellDetailModal({
         <div className="lunch-list">
           {busy.map((idx) => {
             const info = schedule.get(idx)!.get(day)!.get(period)!
-            const text = `${teacherDisplayName(teachers, idx)} ${classCode(info.grade, info.classNum)} ${subjectName(subjects, info.subjectIdx)}`.trim()
-            return <NameBadge key={idx} name={text} bg={colorOf(idx)} />
+            const name = teacherDisplayName(teachers, idx)
+            const text = `${name} ${classCode(info.grade, info.classNum)} ${subjectName(subjects, info.subjectIdx)}`.trim()
+            return <NameBadge key={idx} name={text} bg={colorOf(idx)} me={myName !== '' && name === myName} />
           })}
         </div>
       )}

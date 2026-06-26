@@ -10,6 +10,9 @@ services:
     envVars:
       - key: NODE_VERSION
         value: '20'
+      # 집계 DB(Neon). 값은 Render 대시보드에서 설정(파일에 비밀 미포함). 없으면 트래킹 비활성.
+      - key: DATABASE_URL
+        sync: false
     # 매직넘버는 기본값(서버 코드)으로 동작. 회전 시 아래를 설정/덮어쓰기:
     # - key: COMCI_ROUTE
     #   value: '36179'

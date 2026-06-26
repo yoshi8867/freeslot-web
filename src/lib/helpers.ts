@@ -10,6 +10,13 @@ export function teacherDisplayName(teachers: Array<unknown>, teacherIdx: number)
   return name.endsWith('*') ? name : `${name}*`
 }
 
+/** 교사 이름 정규화 — 끝에 '*' 없으면 추가(뱃지 표시명과 매칭하기 위함). 빈 문자열은 그대로. */
+export function normalizeTeacherName(name: string): string {
+  const t = name.trim()
+  if (!t) return ''
+  return t.endsWith('*') ? t : `${t}*`
+}
+
 /** 과목명: subjects[idx]. idx<=0이면 빈 문자열. */
 export function subjectName(subjects: Array<unknown>, subjectIdx: number): string {
   if (subjectIdx <= 0) return ''
