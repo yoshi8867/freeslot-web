@@ -83,11 +83,22 @@ export function SettingsModal(p: SettingsProps) {
     () => searchTeachers(p.teachers, p.teacherCount, nameQuery, [], 8),
     [p.teachers, p.teacherCount, nameQuery],
   )
+
+  // 현재 토글 기준 셀 표시 예시 (홍길*101정보)
+  const sample =
+    `${p.showName ? '홍길*' : ''}${p.showClass ? '101' : ''}${p.showSubject ? '정보' : ''}`
   return (
     <>
     <Modal title="설정" onClose={close}>
       <div className="section">
-        <div className="section-title">표시 형식</div>
+        <div className="section-title title-with-example">
+          표시 형식
+          {sample && (
+            <span className="badge" style={{ background: '#5B8EDB', color: '#fff', padding: '2px 6px' }}>
+              {sample}
+            </span>
+          )}
+        </div>
         <div className="filter-chips">
           <button className={`filter-chip${p.showName ? ' on' : ''}`} onClick={() => p.onSetShowName(!p.showName)}>
             교사명
@@ -156,7 +167,7 @@ export function SettingsModal(p: SettingsProps) {
           <>
             <input
               className="text-input"
-              placeholder="내 교사 이름 검색"
+              placeholder="내 이름"
               value={nameQuery}
               onChange={(e) => setNameQuery(e.target.value)}
             />
